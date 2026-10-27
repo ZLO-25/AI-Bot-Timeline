@@ -138,7 +138,11 @@ export function Atlas() {
           <p className="text-sm font-semibold tracking-wide text-amber">時間 × 文明影響</p>
           <h1 className="mt-1 font-serif text-4xl leading-none text-fg sm:text-5xl">AI 文明座標</h1>
           <p className="mt-3 text-base leading-relaxed text-muted">
-            橫軸是時間，縱軸是對人類文明的影響，0 到 100。這不是智商，也不是跑分。實心是已發生的事。空心是預測：分數表示若發生，不是發生機率。四項怎麼加，見「怎麼讀」。
+            {view === "models"
+              ? "這張圖只排模型換代。橫軸是時間，縱軸是實驗室，不打文明分數。GPT、Claude、Gemini 各自一列。"
+              : view === "read"
+                ? "分數不是智商，也不是跑分。下面說明四項怎麼加，以及思考和投入各算在哪。"
+                : "橫軸是時間，縱軸是對人類文明的影響，0 到 100。這張圖不收每一次模型換代。實心是已發生的事。空心是預測：分數表示若發生，不是發生機率。"}
           </p>
         </div>
         {view === "map" ? (

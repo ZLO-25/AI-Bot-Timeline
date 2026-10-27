@@ -71,6 +71,14 @@
   }
 }
 
+.model-chart {
+  height: 36rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .chart-frame,
   .rail-scroll {
