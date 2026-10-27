@@ -13,9 +13,18 @@ import {
   type Milestone,
 } from "@/data/milestones";
 import { ImpactChart, type PlotPoint } from "@/components/impact-chart";
+import { Lesson } from "@/components/lesson";
+import { ModelBoard } from "@/components/model-board";
 
 type DomainFilter = DomainId | "all";
 type RailSort = "time" | "impact";
+type ViewId = "map" | "models" | "read";
+
+const VIEWS: { id: ViewId; label: string }[] = [
+  { id: "map", label: "文明座標" },
+  { id: "models", label: "模型時間" },
+  { id: "read", label: "怎麼讀" },
+];
 
 const LENSES: { id: string; label: string; from: number; to: number }[] = [
   { id: "all", label: "全史", from: YEAR_MIN, to: YEAR_MAX },
@@ -49,6 +58,7 @@ export function Atlas() {
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [railSort, setRailSort] = useState<RailSort>("time");
+  const [view, setView] = useState<ViewId>("map");
 
   const plotted = useMemo(() => milestones.map(withPlot), []);
 
@@ -128,19 +138,41 @@ export function Atlas() {
           <p className="text-sm font-semibold tracking-wide text-amber">時間 × 文明影響</p>
           <h1 className="mt-1 font-serif text-4xl leading-none text-fg sm:text-5xl">AI 文明座標</h1>
           <p className="mt-3 text-base leading-relaxed text-muted">
-            橫軸是時間，縱軸是對人類文明的影響，0 到 100。實心是已發生的事。空心在今天之後，是預測：分數表示若發生，不是發生機率。
+            橫軸是時間，縱軸是對人類文明的影響，0 到 100。這不是智商，也不是跑分。實心是已發生的事。空心是預測：分數表示若發生，不是發生機率。四項怎麼加，見「怎麼讀」。
           </p>
         </div>
-        <button
-          type="button"
-          aria-pressed={playing}
-          onClick={() => setPlaying((v) => !v)}
-          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-amber px-4 text-sm font-semibold text-ink transition-transform duration-150 ease-out active:scale-[0.96]"
-        >
-          {playing ? <Pause className="size-4" aria-hidden /> : <Play className="size-4" aria-hidden />}
-          {playing ? "暫停" : "沿時間播放"}
-        </button>
+        {view === "map" ? (
+          <button
+            type="button"
+            aria-pressed={playing}
+            onClick={() => setPlaying((v) => !v)}
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-amber px-4 text-sm font-semibold text-ink transition-transform duration-150 ease-out active:scale-[0.96]"
+          >
+            {playing ? <Pause className="size-4" aria-hidden /> : <Play className="size-4" aria-hidden />}
+            {playing ? "暫停" : "沿時間播放"}
+          </button>
+        ) : null}
       </header>
+
+      <div className="flex gap-2 overflow-x-auto" role="group" aria-label="畫面">
+        {VIEWS.map((item) => (
+          <Chip
+            key={item.id}
+            pressed={view === item.id}
+            onClick={() => {
+              setPlaying(false);
+              setView(item.id);
+            }}
+          >
+            {item.label}
+          </Chip>
+        ))}
+      </div>
+
+      {view === "models" ? <ModelBoard /> : null}
+      {view === "read" ? <Lesson /> : null}
+      {view === "map" ? (
+      <>
 
       <div className="flex flex-col gap-3">
         <div className="flex gap-2 overflow-x-auto" role="group" aria-label="時間範圍">
@@ -326,8 +358,10 @@ export function Atlas() {
 
       <footer className="border-t border-line pt-4 text-sm leading-relaxed text-faint">
         收的是範式轉移，不是每一次模型改版。ChatGPT 很高，因為使用方式被改寫；AlphaFold
-        很高，因為生物學的基礎設施被改寫；Transformer 很高，因為後來的系統站在它上面。今天之後的空心點是情節：代理人若成為工作起點、科學發現若變成合作、以及一個還未被做出來的通用學習系統。信心低的是年份，不是把影響說小。
+        很高，因為生物學的基礎設施被改寫；Transformer 很高，因為後來的系統站在它上面。今天之後的空心點是情節：代理人若成為工作起點、科學發現若變成合作、以及一個還未被做出來的通用學習系統。信心低的是年份，不是把影響說小。各家旗艦和開源權重的發布時間在「模型時間」，分數怎麼讀在「怎麼讀」。
       </footer>
+      </>
+      ) : null}
     </main>
   );
 }
