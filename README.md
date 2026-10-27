@@ -25,12 +25,14 @@ npm run dev
 
 ## GitHub Pages
 
-網站由 `gh-pages` 分支提供，網址見上方。`main` 是原始碼。
+推上 `main` 會跑 [`.github/workflows/pages.yml`](.github/workflows/pages.yml)：建置靜態頁，部署到 GitHub Pages。
 
-更新網站時，在本機建置靜態頁，再把 `dist-pages/client` 裡的檔案推上 `gh-pages`：
+倉庫的 Pages 來源是 **GitHub Actions**。網站掛在子路徑 `/AI-Bot-Timeline/`。如果倉庫改名，請同時改 workflow 裡的 `PAGES_BASE`。
+
+本機只建置、不發布：
 
 ```bash
 npm run build:pages
 ```
 
-網站掛在子路徑 `/AI-Bot-Timeline/`。如果倉庫改名，建置前把 `PAGES_BASE` 改成新的路徑。
+產出在 `dist-pages/client`。
