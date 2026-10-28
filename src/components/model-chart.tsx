@@ -34,25 +34,28 @@ function ModelDot({
   selectedId,
   onSelect,
   onHover,
-}: DotProps & Pick<Props, "selectedId" | "onSelect" | "onHover">) {
+  overlay,
+}: DotProps & Pick<Props, "selectedId" | "onSelect" | "onHover"> & { overlay?: boolean }) {
   if (cx == null || cy == null || !payload) return null;
-  const on = payload.id === selectedId;
+  const on = Boolean(overlay);
   const open = payload.weights === "權重公開";
   return (
-    <g>
-      <circle
-        cx={cx}
-        cy={cy}
-        r={16}
-        fill="transparent"
-        style={{ cursor: "pointer" }}
-        onPointerEnter={(event) => {
-          if (event.pointerType === "touch") return;
-          onHover(payload.id);
-        }}
-        onPointerLeave={() => onHover(null)}
-        onClick={() => onSelect(payload.id)}
-      />
+    <g pointerEvents={overlay ? "none" : undefined}>
+      {overlay ? null : (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={16}
+          fill="transparent"
+          style={{ cursor: "pointer" }}
+          onPointerEnter={(event) => {
+            if (event.pointerType === "touch") return;
+            onHover(payload.id);
+          }}
+          onPointerLeave={() => onHover(null)}
+          onClick={() => onSelect(payload.id)}
+        />
+      )}
       <circle
         cx={cx}
         cy={cy}
@@ -91,7 +94,7 @@ export function ModelChart({ points, labs, selectedId, onSelect, onHover }: Prop
     return () => observer.disconnect();
   }, []);
 
-  const drawn = [...points].sort((a, b) => (a.id === selectedId ? 1 : b.id === selectedId ? -1 : 0));
+  const ordered = [...points].sort((a, b) => a.year - b.year || a.id.localeCompare(b.id));
   const ticks = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
 
   return (
@@ -130,7 +133,8 @@ export function ModelChart({ points, labs, selectedId, onSelect, onHover }: Prop
               label={{ value: "今天", fill: "var(--color-faint)", fontSize: 11, position: "insideTopRight" }}
             />
             <Scatter
-              data={drawn}
+              data={ordered}
+              isAnimationActive={false}
               shape={(raw: DotProps) => (
                 <ModelDot
                   cx={raw.cx}
@@ -139,6 +143,21 @@ export function ModelChart({ points, labs, selectedId, onSelect, onHover }: Prop
                   selectedId={selectedId}
                   onSelect={onSelect}
                   onHover={onHover}
+                />
+              )}
+            />
+            <Scatter
+              data={ordered.filter((point) => point.id === selectedId)}
+              isAnimationActive={false}
+              shape={(raw: DotProps) => (
+                <ModelDot
+                  cx={raw.cx}
+                  cy={raw.cy}
+                  payload={raw.payload}
+                  selectedId={selectedId}
+                  onSelect={onSelect}
+                  onHover={onHover}
+                  overlay
                 />
               )}
             />
