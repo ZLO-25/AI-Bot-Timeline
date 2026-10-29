@@ -11,6 +11,27 @@ import {
 } from "recharts";
 import { TODAY_YEAR, type Milestone } from "@/data/milestones";
 
+/** 還沒到的年份在圖上只占正常寬度的三分之一。到了那一天就恢復。 */
+const FUTURE_SCALE = 1 / 3;
+
+function calendarYear(date: Date) {
+  const y = date.getFullYear();
+  const start = Date.UTC(y, 0, 1);
+  const end = Date.UTC(y + 1, 0, 1);
+  const t = Date.UTC(y, date.getMonth(), date.getDate());
+  return y + (t - start) / (end - start);
+}
+
+function compress(year: number, today: number) {
+  if (year <= today) return year;
+  return today + (year - today) * FUTURE_SCALE;
+}
+
+function expand(x: number, today: number) {
+  if (x <= today) return x;
+  return today + (x - today) / FUTURE_SCALE;
+}
+
 export type PlotPoint = Milestone & { year: number; impact: number };
 
 type DotProps = {
@@ -43,7 +64,12 @@ function yearTicks(from: number, to: number): number[] {
 export function ImpactChart({ points, from, to, selectedId, onSelect, onHover }: Props) {
   const frame = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
+  const [today, setToday] = useState(TODAY_YEAR);
   const [spots, setSpots] = useState<Record<string, { x: number; y: number }>>({});
+
+  useEffect(() => {
+    setToday(calendarYear(new Date()));
+  }, []);
   const onPlace = useCallback((id: string, x: number, y: number) => {
     setSpots((prev) => {
       const current = prev[id];
@@ -62,7 +88,9 @@ export function ImpactChart({ points, from, to, selectedId, onSelect, onHover }:
     return () => observer.disconnect();
   }, []);
 
-  const drawn = [...points].sort((a, b) => a.year - b.year || a.id.localeCompare(b.id));
+  const drawn = [...points]
+    .map((point) => ({ ...point, plotX: compress(point.year, today) }))
+    .sort((a, b) => a.year - b.year || a.id.localeCompare(b.id));
   const labels = placeLabels(drawn, spots, selectedId, size.w, size.h);
 
   return (
@@ -73,14 +101,15 @@ export function ImpactChart({ points, from, to, selectedId, onSelect, onHover }:
             <CartesianGrid stroke="var(--color-line)" vertical={false} />
             <XAxis
               type="number"
-              dataKey="year"
-              domain={[from, to + 1]}
-              ticks={yearTicks(from, to)}
-              tickFormatter={(v: number) => String(Math.round(v))}
+              dataKey="plotX"
+              domain={[compress(from, today), compress(to + 1, today)]}
+              ticks={yearTicks(from, to).map((year) => compress(year, today))}
+              tickFormatter={(v: number) => String(Math.round(expand(v, today)))}
               tick={{ fill: "var(--color-muted)", fontSize: 12 }}
               axisLine={{ stroke: "var(--color-line)" }}
               tickLine={false}
               height={28}
+              allowDataOverflow
             />
             <YAxis
               type="number"
@@ -94,18 +123,18 @@ export function ImpactChart({ points, from, to, selectedId, onSelect, onHover }:
             />
             <ReferenceLine y={40} stroke="var(--color-line)" strokeDasharray="3 4" />
             <ReferenceLine y={70} stroke="var(--color-amber-dim)" strokeDasharray="3 4" />
-            {to >= 2026 ? (
+            {to >= today ? (
               <ReferenceArea
-                x1={Math.max(from, TODAY_YEAR)}
-                x2={to + 1}
+                x1={compress(Math.max(from, today), today)}
+                x2={compress(to + 1, today)}
                 fill="var(--color-sage)"
                 fillOpacity={0.12}
                 ifOverflow="hidden"
               />
             ) : null}
-            {from <= 2026 && to >= 2026 ? (
+            {from <= today && to >= today ? (
               <ReferenceLine
-                x={TODAY_YEAR}
+                x={today}
                 stroke="var(--color-sage)"
                 strokeDasharray="3 4"
                 label={{

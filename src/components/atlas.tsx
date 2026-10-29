@@ -254,7 +254,7 @@ export function Atlas() {
             </p>
           </div>
           <p className="px-1 text-sm leading-relaxed text-faint">
-            琥珀是已發生，灰綠是預測。右側淡色區在今天之後。點圓點，或用下方列表。
+            琥珀是已發生，灰綠是預測。今天之後的年份畫得較窄，到了那一年再恢復正常寬度。右側淡色區在今天之後。
           </p>
         </div>
 
