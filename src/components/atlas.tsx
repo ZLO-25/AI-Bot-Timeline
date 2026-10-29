@@ -15,14 +15,16 @@ import {
 import { ImpactChart, type PlotPoint } from "@/components/impact-chart";
 import { Lesson } from "@/components/lesson";
 import { ModelBoard } from "@/components/model-board";
+import { Story } from "@/components/story";
 
 type DomainFilter = DomainId | "all";
 type RailSort = "time" | "impact";
-type ViewId = "map" | "models" | "read";
+type ViewId = "map" | "models" | "story" | "read";
 
 const VIEWS: { id: ViewId; label: string }[] = [
   { id: "map", label: "文明座標" },
   { id: "models", label: "模型時間" },
+  { id: "story", label: "故事" },
   { id: "read", label: "怎麼讀" },
 ];
 
@@ -140,9 +142,11 @@ export function Atlas() {
           <p className="mt-3 text-base leading-relaxed text-muted">
             {view === "models"
               ? "縱軸是 AAII，橫軸是完成一題的成本。這張圖不打文明分數。左上更好：更強，而且更便宜。"
-              : view === "read"
-                ? "分數不是智商，也不是跑分。下面說明四項怎麼加，以及思考和投入各算在哪。"
-                : "橫軸是時間，縱軸是對人類文明的影響，0 到 100。這張圖不收每一次模型換代。琥珀是已發生的事，灰綠是預測：分數表示若發生，不是發生機率。"}
+              : view === "story"
+                ? "先讀完。名字放在最後。"
+                : view === "read"
+                  ? "分數不是智商，也不是跑分。下面說明四項怎麼加，以及思考和投入各算在哪。"
+                  : "橫軸是時間，縱軸是對人類文明的影響，0 到 100。這張圖不收每一次模型換代。琥珀是已發生的事，灰綠是預測：分數表示若發生，不是發生機率。"}
           </p>
         </div>
         {view === "map" ? (
@@ -174,6 +178,7 @@ export function Atlas() {
       </div>
 
       {view === "models" ? <ModelBoard /> : null}
+      {view === "story" ? <Story /> : null}
       {view === "read" ? <Lesson /> : null}
       {view === "map" ? (
       <>
