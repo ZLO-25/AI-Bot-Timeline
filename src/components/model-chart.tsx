@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import type { AaiiPoint } from "@/data/models";
 
-export type CostPoint = AaiiPoint & { frontier: boolean };
+export type CostPoint = AaiiPoint & { frontier: boolean; labelDy: number };
 
 type DotProps = {
   cx?: number;
@@ -33,10 +33,11 @@ function ModelDot({
   cx,
   cy,
   payload,
+  selectedId,
   onSelect,
   onHover,
   overlay,
-}: DotProps & Pick<Props, "onSelect" | "onHover"> & { overlay?: boolean }) {
+}: DotProps & Pick<Props, "selectedId" | "onSelect" | "onHover"> & { overlay?: boolean }) {
   if (cx == null || cy == null || !payload) return null;
   const open = payload.weights === "權重公開";
   const fill = open ? "var(--color-sage)" : "var(--color-amber)";
@@ -69,17 +70,28 @@ function ModelDot({
         strokeWidth={2}
         pointerEvents="none"
       />
-      {overlay ? (
-        <text
-          x={payload.cost > 6 ? cx - 12 : cx + 12}
-          y={cy - 8}
-          textAnchor={payload.cost > 6 ? "end" : "start"}
-          fill="var(--color-fg)"
-          fontSize={12}
-        >
-          {payload.name}
-        </text>
-      ) : null}
+      {overlay ? null : (
+        <g pointerEvents="none">
+          <line
+            x1={payload.cost > 4 ? cx - 6 : cx + 6}
+            y1={cy}
+            x2={payload.cost > 4 ? cx - 10 : cx + 10}
+            y2={cy + (payload.labelDy ?? -12) - 4}
+            stroke="var(--color-faint)"
+            strokeWidth={1}
+          />
+          <text
+            x={payload.cost > 4 ? cx - 12 : cx + 12}
+            y={cy + (payload.labelDy ?? -12)}
+            textAnchor={payload.cost > 4 ? "end" : "start"}
+            fill={payload.id === selectedId ? "var(--color-fg)" : "var(--color-muted)"}
+            fontSize={11}
+            fontWeight={payload.id === selectedId ? 650 : 500}
+          >
+            {payload.chartLabel ?? payload.name}
+          </text>
+        </g>
+      )}
     </g>
   );
 }
@@ -102,10 +114,10 @@ export function ModelChart({ points, selectedId, onSelect, onHover }: Props) {
   const selected = ordered.filter((point) => point.id === selectedId);
 
   return (
-    <div ref={frame} className="chart-frame relative">
+    <div ref={frame} className="model-chart relative">
       {width > 0 ? (
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 28, right: 16, bottom: 8, left: 0 }}>
+          <ScatterChart margin={{ top: 36, right: 12, bottom: 8, left: 0 }}>
             <CartesianGrid stroke="var(--color-line)" />
             <XAxis
               type="number"
@@ -138,6 +150,7 @@ export function ModelChart({ points, selectedId, onSelect, onHover }: Props) {
                   cx={raw.cx}
                   cy={raw.cy}
                   payload={raw.payload}
+                  selectedId={selectedId}
                   onSelect={onSelect}
                   onHover={onHover}
                 />
@@ -151,6 +164,7 @@ export function ModelChart({ points, selectedId, onSelect, onHover }: Props) {
                   cx={raw.cx}
                   cy={raw.cy}
                   payload={raw.payload}
+                  selectedId={selectedId}
                   onSelect={onSelect}
                   onHover={onHover}
                   overlay

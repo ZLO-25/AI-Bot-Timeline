@@ -5,6 +5,23 @@ import { ModelChart, type CostPoint } from "@/components/model-chart";
 type WeightFilter = "all" | Weights;
 type RegionFilter = "all" | "中國";
 
+const LAB_ORDER = [
+  "OpenAI",
+  "Anthropic",
+  "Google",
+  "xAI",
+  "Meta",
+  "深度求索",
+  "阿里",
+  "月之暗面",
+  "智譜",
+  "小米",
+  "MiniMax",
+  "階躍星辰",
+  "螞蟻",
+  "Mistral",
+];
+
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -16,6 +33,7 @@ function money(value: number) {
 export function ModelBoard() {
   const [weights, setWeights] = useState<WeightFilter>("all");
   const [region, setRegion] = useState<RegionFilter>("all");
+  const [lab, setLab] = useState<string>("all");
   const [selectedId, setSelectedId] = useState("sol");
   const [hoverId, setHoverId] = useState<string | null>(null);
 
@@ -23,16 +41,36 @@ export function ModelBoard() {
     return aaiiModels.filter((model) => {
       if (weights !== "all" && model.weights !== weights) return false;
       if (region === "中國" && model.region !== "中國") return false;
+      if (lab !== "all" && model.lab !== lab) return false;
       return true;
     });
-  }, [weights, region]);
+  }, [weights, region, lab]);
 
   const frontier = useMemo(() => new Set(paretoOf(visible).map((model) => model.id)), [visible]);
 
-  const plotted = useMemo<CostPoint[]>(
-    () => visible.map((model) => ({ ...model, frontier: frontier.has(model.id) })),
-    [visible, frontier],
-  );
+  const plotted = useMemo<CostPoint[]>(() => {
+    const ranked = [...visible].sort((a, b) => b.aaii - a.aaii || a.cost - b.cost);
+    const placed: { x: number; y: number }[] = [];
+    const shift = new Map<string, number>();
+    for (const model of ranked) {
+      const x = Math.log10(model.cost);
+      const options = [-14, 14, -28, 28, -42];
+      let dy = -14;
+      for (const option of options) {
+        const y = model.aaii + option / 7;
+        const clash = placed.some((spot) => Math.abs(spot.x - x) < 0.22 && Math.abs(spot.y - y) < 3);
+        dy = option;
+        if (!clash) break;
+      }
+      placed.push({ x, y: model.aaii + dy / 7 });
+      shift.set(model.id, dy);
+    }
+    return visible.map((model) => ({
+      ...model,
+      frontier: frontier.has(model.id),
+      labelDy: shift.get(model.id) ?? -14,
+    }));
+  }, [visible, frontier]);
 
   const shown =
     plotted.find((model) => model.id === (hoverId ?? selectedId)) ??
@@ -45,10 +83,11 @@ export function ModelBoard() {
       </p>
       <div className="flex gap-2 overflow-x-auto" role="group" aria-label="篩選">
         <Filter
-          pressed={weights === "all" && region === "all"}
+          pressed={weights === "all" && region === "all" && lab === "all"}
           onClick={() => {
             setWeights("all");
             setRegion("all");
+            setLab("all");
           }}
         >
           全部
@@ -62,6 +101,16 @@ export function ModelBoard() {
         <Filter pressed={region === "中國"} onClick={() => setRegion(region === "中國" ? "all" : "中國")}>
           中國公司
         </Filter>
+      </div>
+      <div className="flex gap-2 overflow-x-auto" role="group" aria-label="公司">
+        <Filter pressed={lab === "all"} onClick={() => setLab("all")}>
+          全部公司
+        </Filter>
+        {LAB_ORDER.map((name) => (
+          <Filter key={name} pressed={lab === name} onClick={() => setLab(lab === name ? "all" : name)}>
+            {name}
+          </Filter>
+        ))}
       </div>
 
       <ModelChart
@@ -94,7 +143,7 @@ export function ModelBoard() {
                   on ? "border-amber bg-surface-2" : "border-line bg-surface",
                 )}
               >
-                <span className="w-full truncate text-sm font-semibold text-fg">{model.name}</span>
+                <span className="w-full truncate text-sm font-semibold text-fg">{model.chartLabel ?? model.name}</span>
                 <span className={model.weights === "權重公開" ? "text-xs text-sage" : "text-xs text-amber"}>
                   {model.aaii} · {money(model.cost)}
                 </span>

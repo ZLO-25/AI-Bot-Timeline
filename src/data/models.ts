@@ -13,10 +13,12 @@ export type AaiiPoint = {
   /** 跑完指數裡一題的加權平均美元。 */
   cost: number;
   note: string;
+  /** 圖上的短名。同一模型有兩個點時，用來標出思考力度。 */
+  chartLabel?: string;
 };
 
 export const AAII_SOURCE =
-  "Artificial Analysis Intelligence Index v5.0。每題成本是跑完指數裡一題的加權平均美元，含推理用掉的 token，不是每百萬 token 的標價。摘自 2026年10月29日的公開整理，不是本頁重測。";
+  "Artificial Analysis Intelligence Index v5.0，模型頁與 2026年10月28日的 Carbon 說明。每題成本是跑完指數裡一題的加權平均美元。多數點用該模型最高力度的那一端；Grok 4.7 的 35 分對上的是高力度 6.18 美元，整條產品的成本範圍是 2.92 到 7.51 美元。不是本頁重測。";
 
 export const aaiiModels: AaiiPoint[] = [
   {
@@ -39,6 +41,7 @@ export const aaiiModels: AaiiPoint[] = [
     effort: "最高",
     aaii: 58,
     cost: 10.04,
+    chartLabel: "Opus 5.5 · 最高",
     note: "分數緊貼首位，每題成本是這張表裡最貴的一檔。同一模型把思考力度調低，會變成另一個點。",
   },
   {
@@ -50,6 +53,7 @@ export const aaiiModels: AaiiPoint[] = [
     effort: "低",
     aaii: 35,
     cost: 0.98,
+    chartLabel: "Opus 5.5 · 低",
     note: "還是 Opus 5.5，只是少想。分數從 58 掉到 35，每題成本從 10.04 美元降到 0.98 美元。思考力度會同時搬動兩個軸。",
   },
   {
@@ -113,10 +117,10 @@ export const aaiiModels: AaiiPoint[] = [
     lab: "Anthropic",
     region: "美國",
     weights: "閉源",
-    effort: "極高",
+    effort: "最高",
     aaii: 50,
-    cost: 10.89,
-    note: "這張表上每題最貴，分數只到 50。被 Carbon、Astra、Sol 同時比下去。",
+    cost: 13.04,
+    note: "最高力度每題 13.04 美元，是這張表最貴的一點，分數只有 50。較低力度可以降到 4.49 美元，但那不是這個分數。",
   },
   {
     id: "kimi31",
