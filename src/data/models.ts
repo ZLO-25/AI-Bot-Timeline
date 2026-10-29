@@ -45,7 +45,7 @@ export const aaiiModels: AaiiPoint[] = [
     released: "2026年9月22日",
     aaii: 58,
     cost: 10.04,
-    chartLabel: "Opus 5.5 · 最高",
+    chartLabel: "Opus 5.5",
     note: "分數緊貼首位，每題成本是這張表裡最貴的一檔。同一模型把思考力度調低，會變成另一個點。",
   },
   {
@@ -58,7 +58,7 @@ export const aaiiModels: AaiiPoint[] = [
     released: "2026年9月22日",
     aaii: 35,
     cost: 0.98,
-    chartLabel: "Opus 5.5 · 低",
+    chartLabel: "Opus 低",
     note: "還是 Opus 5.5，只是少想。分數從 58 掉到 35，每題成本從 10.04 美元降到 0.98 美元。思考力度會同時搬動兩個軸。",
   },
   {

@@ -220,6 +220,12 @@ function dotPenalty(box: Box, dots: Array<{ x: number; y: number }>) {
   }, 0);
 }
 
+function rank(id: string, selectedId: string) {
+  if (id === selectedId) return 0;
+  if (id === "opus55") return 1;
+  if (id === "opus55-low") return 2;
+  return 3;
+}
 function placeLabels(
   points: CostPoint[],
   spots: Record<string, { x: number; y: number }>,
@@ -235,14 +241,15 @@ function placeLabels(
   const slots: Array<{ dx: number; dy: number; anchor: Anchor }> = [
     { dx: 0, dy: -16, anchor: "middle" },
     { dx: 0, dy: 18, anchor: "middle" },
+    { dx: -14, dy: -16, anchor: "end" },
+    { dx: -14, dy: 4, anchor: "end" },
     { dx: 12, dy: 4, anchor: "start" },
-    { dx: -12, dy: 4, anchor: "end" },
     { dx: 14, dy: -14, anchor: "start" },
-    { dx: -14, dy: -14, anchor: "end" },
-    { dx: 14, dy: 16, anchor: "start" },
     { dx: -14, dy: 16, anchor: "end" },
+    { dx: 14, dy: 16, anchor: "start" },
   ];
-  const order = [...points].sort((a, b) => (a.id === selectedId ? -1 : b.id === selectedId ? 1 : 0));
+  const pin = new Set(["opus55", "opus55-low"]);
+  const order = [...points].sort((a, b) => rank(a.id, selectedId) - rank(b.id, selectedId));
   const placed: Box[] = [];
   return order.flatMap((point) => {
     const dot = dots.find((item) => item.id === point.id);
@@ -259,6 +266,12 @@ function placeLabels(
       if (penalty > 0) continue;
       const dist = Math.hypot(slot.dx, slot.dy);
       if (!clean || dist < clean.dist) clean = { x, y, anchor: slot.anchor, box, dist };
+    }
+    if (!clean && pin.has(point.id)) {
+      const x = dot.x - 14;
+      const y = dot.y - 16;
+      const box = boxOf(x, y, tw, "end");
+      clean = { x, y, anchor: "end", box, dist: 0 };
     }
     if (!clean) return [];
     placed.push(clean.box);
