@@ -1,4 +1,4 @@
-import { SCORE_META } from "@/data/milestones";
+import { SCORE_META, milestones, type Milestone } from "@/data/milestones";
 
 const EXAMPLES: Record<string, string> = {
   reach: "Transformer 發表時幾乎沒有大眾使用者，觸及很低。ChatGPT 五天破百萬人，觸及才滿。熱門不等於觸及，要有人真的用到。",
@@ -51,6 +51,14 @@ export function Lesson() {
         <p className="mt-3 text-base leading-relaxed text-fg">
           今天之後的點還沒發生。分數的意思是「若發生，影響有多大」，不是發生機率。信心寫的是年份穩不穩。通用學習排得最高，是因為那個定義本身就是文明級的斷裂；2030 只是常被提到的窗口，不是行程表。信心低，低在年份，不是把影響說小。
         </p>
+        <p className="mt-3 text-base leading-relaxed text-muted">
+          下面五格各自寫了怎樣才算發生、怎樣不算，以及可以拿來對照的文章。連結是證據，不是替年份背書。
+        </p>
+        <div className="mt-6 flex flex-col gap-8">
+          {milestones.filter((item) => item.forecast).map((item) => (
+            <ForecastNote key={item.id} item={item} />
+          ))}
+        </div>
       </section>
 
       <section>
@@ -63,5 +71,36 @@ export function Lesson() {
         </p>
       </section>
     </div>
+  );
+}
+
+function ForecastNote({ item }: { item: Milestone }) {
+  return (
+    <article className="border-t border-line pt-4">
+      <h3 className="font-serif text-2xl text-fg">{item.name}</h3>
+      <p className="mt-1 text-sm text-sage">
+        {item.dateLabel} · 信心{item.confidence}
+      </p>
+      {item.lesson?.map((paragraph) => (
+        <p key={paragraph.slice(0, 24)} className="mt-3 text-base leading-relaxed text-fg">
+          {paragraph}
+        </p>
+      ))}
+      <ul className="mt-3 flex flex-col gap-2">
+        {item.readings?.map((reading) => (
+          <li key={reading.href}>
+            <a
+              href={reading.href}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-amber underline decoration-amber/40 underline-offset-2"
+            >
+              {reading.title}
+            </a>
+            <p className="text-sm leading-relaxed text-faint">{reading.note}</p>
+          </li>
+        ))}
+      </ul>
+    </article>
   );
 }

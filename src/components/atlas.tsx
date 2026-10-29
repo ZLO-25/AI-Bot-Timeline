@@ -307,6 +307,36 @@ export function Atlas() {
           </dl>
           <p className="mt-5 text-base leading-relaxed text-fg">{shown.summary}</p>
           <p className="mt-3 text-sm leading-relaxed text-faint">{shown.source}</p>
+          {shown.lesson ? (
+            <div className="mt-5 border-t border-line pt-5">
+              <h3 className="text-sm font-semibold text-sage">怎麼讀這個預測</h3>
+              {shown.lesson.map((paragraph) => (
+                <p key={paragraph.slice(0, 24)} className="mt-3 text-base leading-relaxed text-fg">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          ) : null}
+          {shown.readings ? (
+            <div className="mt-5">
+              <h3 className="text-sm font-semibold text-fg">對照出處</h3>
+              <ul className="mt-3 flex flex-col gap-3">
+                {shown.readings.map((reading) => (
+                  <li key={reading.href}>
+                    <a
+                      href={reading.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm text-amber underline decoration-amber/40 underline-offset-2"
+                    >
+                      {reading.title}
+                    </a>
+                    <p className="mt-1 text-sm leading-relaxed text-faint">{reading.note}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </article>
       </section>
 

@@ -8,6 +8,12 @@ export type DomainId =
 
 export type ScoreKey = "reach" | "capability" | "infrastructure" | "civilization";
 
+export type Reading = {
+  title: string;
+  href: string;
+  note: string;
+};
+
 export type Milestone = {
   id: string;
   y: number;
@@ -35,6 +41,9 @@ export type Milestone = {
   forecast?: boolean;
   /** 低是年份不確定，不是影響小。 */
   confidence?: "高" | "中" | "低";
+  /** 預測才有：怎麼讀這一格，以及怎麼反駁。 */
+  lesson?: string[];
+  readings?: Reading[];
 };
 
 export const DOMAIN_LABEL: Record<DomainId, string> = {
@@ -487,8 +496,26 @@ export const milestones: Milestone[] = [
     forecast: true,
     confidence: "高",
     summary:
-      "若多數知識工作從代理人開始，而不是從空白文件或搜尋框開始，使用方式會再改一次。這不是某一版模型的發布日，是 Grok Bot、Operator 這條線若走完的位置。方向已經開始，不確定的是普及要多久。",
-    source: "情節，不是已公布的產品時程。",
+      "若多數知識工作從代理人開始，而不是從空白文件或搜尋框開始，使用方式會再改一次。這不是某一版模型的發布日，是 Grok Bot、Operator 這條線若走完的位置。",
+    source: "情節，不是已公布的產品時程。出處用來對照現況，不替 2027 背書。",
+    lesson: [
+      "這一格問的不是「有沒有代理人產品」，而是知識工作的起點有沒有換掉。今天多數人仍從空白文件、收件匣或搜尋框開始，再把片段交給模型。若發生，指的是多數這類工作改成先把任務交出去，人負責交代目標、看結果、改方向。",
+      "已經看得到的證據，和「已經發生」差很遠。Anthropic 用 Claude 的真實對話做經濟指數：使用集中在寫程式和技術寫作，而且多數仍是人機一起做，不是把整件事交出去。史丹佛 AI Index 記的是能力與採用在上升，不是某一種介面已經成為預設。信心高，高在方向看得到；2027 只是這條線若走完的位置。",
+      "分數這樣拆：觸及高，是因為「若發生」時用的人會很多。能力沒有給滿，因為跨工具把事情做完，在 2025–2026 已經開始，不是全新的一類。鎖定高，是工作流一旦改了起點，就很難退回空白文件。後果高，是勞動過程改了，不是因為多了一個更會聊天的模型。",
+      "怎麼反駁：若接下來代理人仍是側邊欄，打開才用，這一格就不該算發生，也不該事後把分數補上。",
+    ],
+    readings: [
+      {
+        title: "Stanford HAI，2025 AI Index",
+        href: "https://hai.stanford.edu/ai-index/2025-ai-index-report",
+        note: "史丹佛以數據整理能力、採用與社會影響。看趨勢，不看口號。",
+      },
+      {
+        title: "Anthropic Economic Index（2025）",
+        href: "https://www.anthropic.com/news/the-anthropic-economic-index",
+        note: "用真實對話看 AI 現在做哪些工作。目前偏協作，還不是把工作交出去。",
+      },
+    ],
   },
   {
     id: "science-loop",
@@ -507,8 +534,26 @@ export const milestones: Milestone[] = [
     forecast: true,
     confidence: "中",
     summary:
-      "若多個學科裡，系統能提出假設、設計實驗，再把結果收回來，科學發現的節奏會改。AlphaFold 解決的是結構；這一格說的是發現本身變成常規合作。年份是粗的。",
-    source: "情節，不是已公布的產品時程。",
+      "若多個學科裡，系統能提出假設、設計實驗，再把結果收回來，科學發現的節奏會改。AlphaFold 解決的是結構；這一格說的是發現本身變成常規合作。",
+    source: "情節，不是已公布的產品時程。年份是粗的。",
+    lesson: [
+      "AlphaFold 把「一個蛋白質長什麼樣」從實驗瓶頸變成可查。這一格更進一步：假設、實驗設計、結果收回來、下一個假設，若在多個學科變成常規合作，發現的節奏才算改掉。只做文獻摘要或作圖，不夠。",
+      "2023 年《自然》的綜述把 AI 放進科學流程的每一步，也寫明還沒走完的部分。2025 年 Google 的 AI co-scientist，以及 2026 年發表在《自然》的後續，是多個代理人互相辯仮説、再送到實驗室檢驗的早期例子。那是工具進了實驗室，不是科學已經改由機器主持。",
+      "信心中等，因為方法已有論文和實驗，研究制度還沒換。能力給得高，是新學會「提出可檢驗的假設」。觸及故意不高，因為用得到的仍是少數實驗室。",
+      "怎麼反駁：若它停在搜尋文獻，沒有把新假設送進實驗並改下一輪，這一格就不算。",
+    ],
+    readings: [
+      {
+        title: "Wang 等，《自然》2023：AI 時代的科學發現",
+        href: "https://www.nature.com/articles/s41586-023-06221-2",
+        note: "綜述 AI 在假設、實驗與資料裡各自走到哪，以及還沒走到的地方。",
+      },
+      {
+        title: "Google Research，AI co-scientist（2025）",
+        href: "https://research.google/blog/accelerating-scientific-breakthroughs-with-an-ai-co-scientist",
+        note: "多代理人產生假設，並在藥物與抗藥性題目上做過實驗室檢驗。是例子，不是常規。",
+      },
+    ],
   },
   {
     id: "general-learn",
@@ -528,8 +573,25 @@ export const milestones: Milestone[] = [
     forecast: true,
     confidence: "低",
     summary:
-      "「能學會任何熟練的人學得會的新領域」若被做出來，影響會高過聊天介面。2030 只是實驗室公開時程裡常被提到的窗口，不是承諾。信心低，低在年份與定義，不低在「若真的發生會很大」。",
-    source: "情節，不是已公布的產品時程。",
+      "「能學會任何熟練的人學得會的新領域」若被做出來，影響會高過聊天介面。2030 只是實驗室公開時程裡常被提到的窗口，不是承諾。",
+    source: "情節。信心低在年份與定義，不在「若發生會很大」。",
+    lesson: [
+      "這裡的定義很窄：系統能學會一個熟練的人學得會的新領域，而不是同一張考卷再高幾分。聊天變強、程式變強，都還不是這一格。",
+      "2030 不是測量出來的。它是實驗室公開說法裡常出現的窗口。國際 AI 安全報告由 Bengio 主持，三十多國與聯合國、OECD、歐盟提名專家，整理的是通用系統現在做得到什麼、風險證據到哪，不替任何一家的年份背書。報告能當對照，不能當成行程表。",
+      "四項都高，是因為這個定義本身就是斷裂：用法會跟著走，後面的系統與制度都會站上去。若你認為這個定義只是口號，正確的反對是整格拿掉，不是把總分平均調低。",
+    ],
+    readings: [
+      {
+        title: "International AI Safety Report（2025、2026）",
+        href: "https://internationalaisafetyreport.org/publications",
+        note: "Bengio 主持，百餘位專家執筆。寫能力與風險的證據，不寫某年一定達成。",
+      },
+      {
+        title: "2025 年報告全文（arXiv）",
+        href: "https://arxiv.org/abs/2501.17805",
+        note: "同一份報告的公開文本，方便查它實際寫了什麼、沒寫什麼。",
+      },
+    ],
   },
   {
     id: "institutions",
@@ -548,8 +610,25 @@ export const milestones: Milestone[] = [
     forecast: true,
     confidence: "低",
     summary:
-      "若代理人做掉大量例行的認知工作，學校、證照、事務所與公司的分工會被迫改。這不是新模型，是制度跟上。年份比技術節點更軟。",
-    source: "情節，不是已公布的產品時程。",
+      "若代理人做掉大量例行的認知工作，學校、證照、事務所與公司的分工會被迫改。這不是新模型，是制度跟上。",
+    source: "情節。年份比技術節點更軟。",
+    lesson: [
+      "這一格沒有新模型。它問的是學校、證照、事務所和公司的分工，會不會因為例行的認知工作被做掉而改寫。工具換了、證書和組織還在，就不算。",
+      "國際貨幣基金 2024 年的研究：先進經濟體因為工作偏認知，會更早感受到；暴露於 AI 不等於失業，和人互補時收入可以上升。Autor 在 NBER 的論點不是預言，而是一種可能：若 AI 把專家的判斷交到更多人手上，中階工作可以被重建；若判斷權更集中，制度會往另一邊改。兩種方向都算改寫。",
+      "能力項故意低：制度改寫不需要機器再學會一種新技能。後果高，因為改的是誰有資格做決定。信心低，低在哪一年，不低在這件事一旦發生就很大。",
+    ],
+    readings: [
+      {
+        title: "IMF：生成式 AI 與工作的未來（2024）",
+        href: "https://www.imf.org/en/Publications/staff-discussion-notes/Issues/2024/01/14/Gen-AI-Artificial-Intelligence-and-the-Future-of-Work-542379",
+        note: "先進經濟體暴露較高。暴露不是失業名單，互補時收入也可以上升。",
+      },
+      {
+        title: "David Autor，NBER 32140（2024）",
+        href: "https://www.nber.org/papers/w32140",
+        note: "論點是 AI 有可能把專業判斷擴到更多工作者。作者寫明這不是預測。",
+      },
+    ],
   },
   {
     id: "embodied",
@@ -569,8 +648,25 @@ export const milestones: Milestone[] = [
     forecast: true,
     confidence: "低",
     summary:
-      "倉庫裡的機器人已經有了。這一格是通用的身體：家庭與一般工廠裡，機器能在沒有為每個動作寫腳本的情況下做事。硬體與可靠度都還沒到。",
-    source: "情節，不是已公布的產品時程。",
+      "倉庫裡的機器人已經有了。這一格是通用的身體：家庭與一般工廠裡，機器能在沒有為每個動作寫腳本的情況下做事。",
+    source: "情節。硬體週期比模型發布慢，年份的信心低。",
+    lesson: [
+      "倉庫和產線上的機器人已經在做事，而且多半是為每個動作寫好的。這一格是通用的身體：家裡和一般工廠裡，沒有為每個動作寫腳本也能做。演示影片不算。",
+      "Open X-Embodiment 集合二十一個機構、二十二種機器人的操作數據，想訓練能跨機器遷移的策略。它說明研究方向是「一個政策、很多身體」，也說明現在仍主要在實驗室的操作任務，不是家庭。機器人基礎模型的綜述把缺口寫清楚：感知和規劃進步了，數據、安全與可靠度還沒有。",
+      "後果低於通用學習：身體若可靠，改的是體力勞動的現場，不會自動改寫知識制度。觸及留在中間，是因為離開實驗室之前，用到的人不會多。",
+    ],
+    readings: [
+      {
+        title: "Open X-Embodiment（arXiv:2310.08864）",
+        href: "https://arxiv.org/abs/2310.08864",
+        note: "跨二十二種機器人的操作數據與 RT-X。實驗室裡的通用，不是家用機器人已經普及。",
+      },
+      {
+        title: "Foundation Models in Robotics（arXiv:2312.07843）",
+        href: "https://arxiv.org/abs/2312.07843",
+        note: "綜述基礎模型進機器人的進展，以及數據、安全、即時控制這些還沒解的部分。",
+      },
+    ],
   },
 ];
 
@@ -599,4 +695,7 @@ for (const m of milestones) {
   }
   if (impactOf(m) > 100) throw new Error(`impact overflow ${m.id}`);
   if (m.forecast && !m.confidence) throw new Error(`forecast needs confidence ${m.id}`);
+  if (m.forecast && (!m.lesson?.length || !m.readings?.length)) {
+    throw new Error(`forecast needs a lesson ${m.id}`);
+  }
 }
