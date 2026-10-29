@@ -1,9 +1,54 @@
 import { useMemo, useState } from "react";
+import { aaiiModels, type Weights } from "@/data/models";
 import { releases, type Release } from "@/data/releases";
-import type { Weights } from "@/data/models";
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
+}
+
+const V5_ID: Record<string, string> = {
+  carbon: "carbon",
+  opus55: "opus55",
+  astra: "astra",
+  sol: "sol",
+  sonnet55: "sonnet55",
+  terra: "terra",
+  argon: "argon",
+  fable: "fable",
+  kimi31: "kimi31",
+  muse: "muse",
+  haiku55: "haiku",
+  spark13r: "spark13",
+  grok47: "grok47",
+  qwen38r: "qwen38",
+  dsv41: "dsv41",
+  glm53r: "glm53",
+  gem38r: "gem38",
+  mimo: "mimo",
+  minimax: "minimax",
+  step5: "step5",
+  ling: "ling",
+  luna: "luna",
+  "spark-open": "spark-open",
+  mistral4: "mistral4",
+};
+
+/** 舊指數上的最高力度分數。不能和 v5 直接比。 */
+const OLD_INDEX: Record<string, { score: number; index: string }> = {
+  opus48: { score: 56, index: "v4.1" },
+  gpt55: { score: 55, index: "v4.1" },
+  sonnet5: { score: 53, index: "v4.1" },
+  gem31: { score: 46, index: "v4.1" },
+  dsv4: { score: 44, index: "v4.1" },
+};
+
+function scoreOf(id: string) {
+  const current = V5_ID[id];
+  if (current) {
+    const model = aaiiModels.find((item) => item.id === current);
+    if (model) return { score: model.aaii, index: "v5" };
+  }
+  return OLD_INDEX[id] ?? null;
 }
 
 export function ReleaseTimeline({
@@ -34,7 +79,7 @@ export function ReleaseTimeline({
       <div>
         <h2 className="font-serif text-2xl text-fg">歷代發布</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          前沿實驗室有名字的一代，新的在前。Opus 4.8、Sonnet 5 在 2026 年這段。上面的分數圖只用智力指數 v5，較早版本的舊指數分數不畫進去。
+          每一列右側是 AAII。標 v5 的和上面那張圖相同。標 v4.1 的是舊考卷，數字不能和 v5 直接比。沒有數字的，是這兩份指數都沒有公開分數。
         </p>
       </div>
       {shown ? <ReleaseDetail item={shown} /> : <p className="text-sm text-muted">這個篩選下面沒有發布。</p>}
@@ -49,6 +94,7 @@ export function ReleaseTimeline({
                 .reverse()
                 .map((item) => {
                   const on = item.id === shown?.id;
+                  const score = scoreOf(item.id);
                   return (
                     <li key={item.id}>
                       <button
@@ -61,7 +107,17 @@ export function ReleaseTimeline({
                       >
                         <span className="w-28 shrink-0 text-xs tabular-nums text-faint">{item.dateLabel}</span>
                         <span className="min-w-0 flex-1 truncate text-sm font-semibold text-fg">{item.name}</span>
-                        <span className={item.weights === "權重公開" ? "shrink-0 text-xs text-sage" : "shrink-0 text-xs text-amber"}>
+                        <span className="w-16 shrink-0 text-right text-sm tabular-nums text-amber">
+                          {score ? (
+                            <>
+                              {score.score}
+                              <span className="ml-1 text-xs text-faint">{score.index}</span>
+                            </>
+                          ) : (
+                            <span className="text-xs text-faint">—</span>
+                          )}
+                        </span>
+                        <span className={item.weights === "權重公開" ? "w-16 shrink-0 text-right text-xs text-sage" : "w-16 shrink-0 text-right text-xs text-amber"}>
                           {item.lab}
                         </span>
                       </button>
@@ -77,6 +133,7 @@ export function ReleaseTimeline({
 }
 
 function ReleaseDetail({ item }: { item: Release }) {
+  const score = scoreOf(item.id);
   return (
     <article className="rounded-2xl border border-line bg-surface p-5">
       <p className="text-sm text-amber">
@@ -88,6 +145,17 @@ function ReleaseDetail({ item }: { item: Release }) {
       </p>
       <h3 className="mt-1 font-serif text-3xl leading-tight text-fg">{item.name}</h3>
       <p className="mt-1 text-sm text-muted">發布：{item.dateLabel}</p>
+      {score ? (
+        <p className="mt-4">
+          <span className="block text-sm text-faint">AAII · 智力指數 {score.index}</span>
+          <span className="font-serif text-5xl leading-none tabular-nums text-amber">{score.score}</span>
+        </p>
+      ) : (
+        <p className="mt-4 text-sm text-muted">沒有公開的 AAII。</p>
+      )}
+      {score && score.index !== "v5" ? (
+        <p className="mt-2 text-sm leading-relaxed text-faint">這是舊指數上的最高力度分數，考卷和現在的 v5 不同，不能和上面那張圖的數字直接比。</p>
+      ) : null}
       <p className="mt-3 text-base leading-relaxed text-fg">{item.trait}</p>
     </article>
   );
