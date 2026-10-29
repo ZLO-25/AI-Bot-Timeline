@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { AAII_SOURCE, aaiiModels, paretoOf, type AaiiPoint, type Weights } from "@/data/models";
 import { ModelChart, type CostPoint } from "@/components/model-chart";
+import { ReleaseTimeline } from "@/components/release-timeline";
 
 type WeightFilter = "all" | Weights;
 type RegionFilter = "all" | "中國";
@@ -19,6 +20,7 @@ const LAB_ORDER = [
   "MiniMax",
   "階躍星辰",
   "螞蟻",
+  "百度",
   "Mistral",
 ];
 
@@ -151,6 +153,7 @@ export function ModelBoard() {
             );
           })}
       </div>
+      <ReleaseTimeline lab={lab} weights={weights} region={region} />
     </div>
   );
 }
