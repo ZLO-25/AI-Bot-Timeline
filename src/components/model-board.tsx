@@ -166,7 +166,11 @@ function Detail({ model }: { model: AaiiPoint }) {
         <span className={model.weights === "權重公開" ? "text-sage" : "text-amber"}>{model.weights}</span>
       </p>
       <h2 className="mt-1 font-serif text-3xl leading-tight text-fg">{model.name}</h2>
-      <p className="mt-1 text-sm text-muted">思考力度：{model.effort}</p>
+      <p className="mt-1 text-sm text-muted">
+        發布：{model.released}
+        <span className="mx-2 text-faint">·</span>
+        思考力度：{model.effort}
+      </p>
       <p className="mt-4 flex items-end gap-6">
         <span>
           <span className="block text-sm text-faint">AAII</span>
