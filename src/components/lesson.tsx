@@ -47,7 +47,7 @@ export function Lesson() {
       </section>
 
       <section>
-        <h2 className="font-serif text-3xl text-fg">空心點是情節</h2>
+        <h2 className="font-serif text-3xl text-fg">灰綠點是情節</h2>
         <p className="mt-3 text-base leading-relaxed text-fg">
           今天之後的點還沒發生。分數的意思是「若發生，影響有多大」，不是發生機率。信心寫的是年份穩不穩。通用學習排得最高，是因為那個定義本身就是文明級的斷裂；2030 只是常被提到的窗口，不是行程表。信心低，低在年份，不是把影響說小。
         </p>

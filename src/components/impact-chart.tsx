@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CartesianGrid,
   ReferenceArea,
@@ -42,28 +42,32 @@ function yearTicks(from: number, to: number): number[] {
 
 export function ImpactChart({ points, from, to, selectedId, onSelect, onHover }: Props) {
   const frame = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(0);
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  const [spots, setSpots] = useState<Record<string, { x: number; y: number }>>({});
+  const onPlace = useCallback((id: string, x: number, y: number) => {
+    setSpots((prev) => {
+      const current = prev[id];
+      if (current && Math.abs(current.x - x) < 0.5 && Math.abs(current.y - y) < 0.5) return prev;
+      return { ...prev, [id]: { x, y } };
+    });
+  }, []);
 
   useEffect(() => {
     const el = frame.current;
     if (!el) return;
-    const apply = () => setWidth(el.clientWidth);
+    const apply = () => setSize({ w: el.clientWidth, h: el.clientHeight });
     apply();
     const observer = new ResizeObserver(apply);
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
-  const compact = width < 720;
-  const drawn = [...points].sort((a, b) => {
-    if (a.id === selectedId) return 1;
-    if (b.id === selectedId) return -1;
-    return a.impact - b.impact;
-  });
+  const drawn = [...points].sort((a, b) => a.year - b.year || a.id.localeCompare(b.id));
+  const labels = placeLabels(drawn, spots, selectedId, size.w, size.h);
 
   return (
     <div ref={frame} className="chart-frame relative">
-      {width > 0 ? (
+      {size.w > 0 ? (
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 28, right: 12, bottom: 8, left: 0 }}>
             <CartesianGrid stroke="var(--color-line)" vertical={false} />
@@ -120,7 +124,8 @@ export function ImpactChart({ points, from, to, selectedId, onSelect, onHover }:
                   cx={raw.cx}
                   cy={raw.cy}
                   payload={raw.payload}
-                  compact={compact || to - from > 20}
+                  compact={false}
+                  onPlace={onPlace}
                   selectedId={selectedId}
                   onSelect={onSelect}
                   onHover={onHover}
@@ -130,6 +135,22 @@ export function ImpactChart({ points, from, to, selectedId, onSelect, onHover }:
           </ScatterChart>
         </ResponsiveContainer>
       ) : null}
+      <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+        {labels.map((label) => (
+          <text
+            key={label.id}
+            x={label.x}
+            y={label.y}
+            textAnchor={label.anchor}
+            fill={label.selected ? "var(--color-fg)" : "var(--color-muted)"}
+            fontSize={12}
+            fontFamily="var(--font-sans)"
+            fontWeight={label.selected ? 700 : 600}
+          >
+            {label.text}
+          </text>
+        ))}
+      </svg>
       {points.length === 0 ? (
         <p className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-muted">
           這個範圍裡沒有節點。把時間拉寬，或改回全部。
@@ -143,82 +164,123 @@ function EventDot({
   cx,
   cy,
   payload,
-  compact,
   selectedId,
   onSelect,
   onHover,
+  onPlace,
 }: DotProps & {
   compact: boolean;
   selectedId: string;
   onSelect: (id: string) => void;
   onHover: (id: string | null) => void;
+  onPlace?: (id: string, x: number, y: number) => void;
 }) {
+  useEffect(() => {
+    if (cx == null || cy == null || !payload) return;
+    onPlace?.(payload.id, cx, cy);
+  }, [cx, cy, payload, onPlace]);
   if (cx == null || cy == null || !payload) return null;
   const selected = payload.id === selectedId;
   const forecast = Boolean(payload.forecast);
-  const r = 5 + (payload.impact / 100) * 6;
-  const showLabel = selected || (!compact && payload.anchor);
-  let place = payload.labelPlace ?? "above";
-  if (place === "left" && cx < 108) place = "below";
-  if (place === "above" && cy < 26) place = "below";
-
-  let x = cx;
-  let y = cy - r - 8;
-  let anchor: "middle" | "end" = "middle";
-  if (place === "below") y = cy + r + 14;
-  if (place === "left") {
-    x = cx - r - 8;
-    y = cy + 4;
-    anchor = "end";
-  }
-  const tone = forecast ? "var(--color-sage)" : "var(--color-amber)";
-  const faded = forecast && !selected && payload.confidence === "低";
-
+  const fill = forecast ? "var(--color-sage)" : "var(--color-amber)";
+  const r = 6;
   return (
     <g>
-      {selected ? (
-        <circle cx={cx} cy={cy} r={r + 6} fill="none" stroke={tone} strokeWidth={1.5} />
-      ) : null}
+      {selected ? <circle cx={cx} cy={cy} r={r + 7} fill="none" stroke={fill} strokeWidth={1.5} /> : null}
+      <circle cx={cx} cy={cy} r={selected ? r + 1 : r} fill={fill} />
       <circle
         cx={cx}
         cy={cy}
-        r={selected ? r + 1.5 : r}
-        fill={forecast ? "transparent" : "var(--color-amber)"}
-        stroke={forecast ? "var(--color-sage)" : "none"}
-        strokeWidth={forecast ? 1.75 : 0}
-        opacity={faded ? 0.72 : selected || !forecast ? 1 : 0.95}
-      />
-      <circle
-        cx={cx}
-        cy={cy}
-        r={18}
+        r={16}
         fill="transparent"
-        className="cursor-pointer"
-        onClick={() => onSelect(payload.id)}
+        style={{ cursor: "pointer" }}
         onPointerEnter={(event) => {
           if (event.pointerType === "touch") return;
           onHover(payload.id);
         }}
         onPointerLeave={() => onHover(null)}
+        onClick={() => onSelect(payload.id)}
       >
         <title>
           {payload.name} · {payload.impact}
           {forecast ? " · 預測" : ""}
         </title>
       </circle>
-      {showLabel ? (
-        <text
-          x={x}
-          y={y}
-          textAnchor={anchor}
-          fill={forecast ? "var(--color-sage)" : "var(--color-fg)"}
-          fontSize={12}
-          fontFamily="var(--font-sans)"
-          fontWeight={selected ? 700 : 600}
-        >
-          {payload.chartLabel}
-        </text>
-      ) : null}
     </g>
   );
+}
+
+type Anchor = "start" | "middle" | "end";
+type Box = { l: number; t: number; r: number; b: number };
+
+function textWidth(text: string) {
+  let width = 0;
+  for (const ch of text) width += ch.charCodeAt(0) > 255 ? 16 : 7.2;
+  return width;
+}
+
+function boxOf(x: number, y: number, width: number, anchor: Anchor): Box {
+  const left = anchor === "start" ? x : anchor === "end" ? x - width : x - width / 2;
+  return { l: left, t: y - 12, r: left + width, b: y + 3 };
+}
+
+function overlapArea(a: Box, b: Box) {
+  const w = Math.min(a.r, b.r) - Math.max(a.l, b.l);
+  const h = Math.min(a.b, b.b) - Math.max(a.t, b.t);
+  return w > 0 && h > 0 ? w * h : 0;
+}
+
+function dotPenalty(box: Box, dots: Array<{ x: number; y: number }>) {
+  return dots.reduce((sum, dot) => {
+    const x = Math.max(box.l, Math.min(dot.x, box.r));
+    const y = Math.max(box.t, Math.min(dot.y, box.b));
+    const gap = Math.hypot(dot.x - x, dot.y - y);
+    return gap < 10 ? sum + (10 - gap) * 40 : sum;
+  }, 0);
+}
+
+function placeLabels(
+  points: PlotPoint[],
+  spots: Record<string, { x: number; y: number }>,
+  selectedId: string,
+  width: number,
+  height: number,
+) {
+  const dots = points.flatMap((point) => {
+    const spot = spots[point.id];
+    return spot ? [{ ...spot, id: point.id }] : [];
+  });
+  if (dots.length === 0 || width === 0) return [];
+  const slots: Array<{ dx: number; dy: number; anchor: Anchor }> = [
+    { dx: 0, dy: -16, anchor: "middle" },
+    { dx: 0, dy: 18, anchor: "middle" },
+    { dx: 12, dy: 4, anchor: "start" },
+    { dx: -12, dy: 4, anchor: "end" },
+    { dx: 14, dy: -14, anchor: "start" },
+    { dx: -14, dy: -14, anchor: "end" },
+    { dx: 14, dy: 16, anchor: "start" },
+    { dx: -14, dy: 16, anchor: "end" },
+  ];
+  const order = [...points].sort((a, b) => (a.id === selectedId ? -1 : b.id === selectedId ? 1 : 0));
+  const placed: Box[] = [];
+  return order.flatMap((point) => {
+    const dot = dots.find((item) => item.id === point.id);
+    if (!dot) return [];
+    const text = point.chartLabel;
+    const tw = textWidth(text);
+    let clean: { x: number; y: number; anchor: Anchor; box: Box; dist: number } | null = null;
+    for (const slot of slots) {
+      const x = dot.x + slot.dx;
+      const y = dot.y + slot.dy;
+      const box = boxOf(x, y, tw, slot.anchor);
+      if (box.l < 4 || box.r > width - 4 || box.t < 14 || box.b > height - 6) continue;
+      const penalty = dotPenalty(box, dots) + placed.reduce((sum, other) => sum + overlapArea(box, other), 0);
+      if (penalty > 0) continue;
+      const dist = Math.hypot(slot.dx, slot.dy);
+      if (!clean || dist < clean.dist) clean = { x, y, anchor: slot.anchor, box, dist };
+    }
+    if (!clean) return [];
+    placed.push(clean.box);
+    return [{ id: point.id, text, x: clean.x, y: clean.y, anchor: clean.anchor, selected: point.id === selectedId }];
+  });
 }

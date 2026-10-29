@@ -58,7 +58,7 @@
 }
 
 .chart-frame {
-  height: 20rem;
+  height: 32rem;
   background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
@@ -67,16 +67,22 @@
 
 @media (min-width: 64rem) {
   .chart-frame {
-    height: 28rem;
+    height: 40rem;
   }
 }
 
 .model-chart {
-  height: 36rem;
+  height: 32rem;
   background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
   overflow: hidden;
+}
+
+@media (min-width: 64rem) {
+  .model-chart {
+    height: 40rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
