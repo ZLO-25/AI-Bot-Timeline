@@ -81,7 +81,7 @@ export function ModelBoard() {
   return (
     <div className="flex flex-col gap-4">
       <p className="max-w-2xl text-base leading-relaxed text-muted">
-        縱軸是 AAII，Artificial Analysis 的智力指數 v5，滿分 100，目前最高 59。橫軸是 cost per task：跑完指數裡一題的平均美元，對數刻度。左上更好。灰綠虛線圈是帕累托前沿，沒有別的點又更強又更便宜。
+        縱軸是 AAII，Artificial Analysis 的智力指數 v5，滿分 100，目前最高 59。橫軸是 cost per task：跑完指數裡一題的平均美元，對數刻度。左上更好。
       </p>
       <div className="flex gap-2 overflow-x-auto" role="group" aria-label="篩選">
         <Filter
