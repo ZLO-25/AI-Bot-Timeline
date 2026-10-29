@@ -11,8 +11,8 @@ import {
 } from "recharts";
 import { TODAY_YEAR, type Milestone } from "@/data/milestones";
 
-/** 還沒到的年份在圖上只占正常寬度的三分之一。到了那一天就恢復。 */
-const FUTURE_SCALE = 1 / 3;
+/** 還沒到的年份在圖上只占正常寬度的六分之一。到了那一天就恢復。 */
+const FUTURE_SCALE = 1 / 6;
 
 function calendarYear(date: Date) {
   const y = date.getFullYear();
@@ -49,7 +49,7 @@ type Props = {
   onHover: (id: string | null) => void;
 };
 
-function yearTicks(from: number, to: number): number[] {
+function yearTicks(from: number, to: number, today: number): number[] {
   if (to - from > 50) {
     return [1950, 1970, 1990, 2010, 2030].filter((y) => y >= from && y <= to);
   }
@@ -58,7 +58,8 @@ function yearTicks(from: number, to: number): number[] {
   const ticks: number[] = [];
   const first = Math.ceil(from / step) * step;
   for (let y = first; y <= to; y += step) ticks.push(y);
-  return ticks.length > 0 ? ticks : [from];
+  const kept = ticks.filter((y) => y <= today + 0.01 || y % 4 === 0);
+  return kept.length > 0 ? kept : [from];
 }
 
 export function ImpactChart({ points, from, to, selectedId, onSelect, onHover }: Props) {
@@ -103,7 +104,7 @@ export function ImpactChart({ points, from, to, selectedId, onSelect, onHover }:
               type="number"
               dataKey="plotX"
               domain={[compress(from, today), compress(to + 1, today)]}
-              ticks={yearTicks(from, to).map((year) => compress(year, today))}
+              ticks={yearTicks(from, to, today).map((year) => compress(year, today))}
               tickFormatter={(v: number) => String(Math.round(expand(v, today)))}
               tick={{ fill: "var(--color-muted)", fontSize: 12 }}
               axisLine={{ stroke: "var(--color-line)" }}
