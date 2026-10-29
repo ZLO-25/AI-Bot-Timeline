@@ -1,44 +1,45 @@
 import { useEffect, useRef, useState } from "react";
 import {
   CartesianGrid,
-  ReferenceLine,
   ResponsiveContainer,
   Scatter,
   ScatterChart,
   XAxis,
   YAxis,
 } from "recharts";
-import { TODAY_YEAR } from "@/data/milestones";
-import type { LabModel } from "@/data/models";
+import type { AaiiPoint } from "@/data/models";
 
-export type ModelPoint = LabModel & { year: number; lane: number };
+export type CostPoint = AaiiPoint & { frontier: boolean };
 
 type DotProps = {
   cx?: number;
   cy?: number;
-  payload?: ModelPoint;
+  payload?: CostPoint;
 };
 
 type Props = {
-  points: ModelPoint[];
-  labs: string[];
+  points: CostPoint[];
   selectedId: string;
   onSelect: (id: string) => void;
   onHover: (id: string | null) => void;
 };
 
+function money(value: number) {
+  if (value < 1) return `$${Number(value.toFixed(2))}`;
+  return `$${value}`;
+}
+
 function ModelDot({
   cx,
   cy,
   payload,
-  selectedId,
   onSelect,
   onHover,
   overlay,
-}: DotProps & Pick<Props, "selectedId" | "onSelect" | "onHover"> & { overlay?: boolean }) {
+}: DotProps & Pick<Props, "onSelect" | "onHover"> & { overlay?: boolean }) {
   if (cx == null || cy == null || !payload) return null;
-  const on = Boolean(overlay);
   const open = payload.weights === "權重公開";
+  const fill = open ? "var(--color-sage)" : "var(--color-amber)";
   return (
     <g pointerEvents={overlay ? "none" : undefined}>
       {overlay ? null : (
@@ -56,20 +57,23 @@ function ModelDot({
           onClick={() => onSelect(payload.id)}
         />
       )}
+      {payload.frontier ? (
+        <circle cx={cx} cy={cy} r={11} fill="none" stroke="var(--color-sage)" strokeDasharray="2 2" pointerEvents="none" />
+      ) : null}
       <circle
         cx={cx}
         cy={cy}
-        r={on ? 7 : 5}
-        fill={open ? "var(--color-sage)" : "var(--color-amber)"}
-        stroke={on ? "var(--color-fg)" : "var(--color-bg)"}
+        r={overlay ? 7 : 5}
+        fill={fill}
+        stroke={overlay ? "var(--color-fg)" : "var(--color-bg)"}
         strokeWidth={2}
         pointerEvents="none"
       />
-      {on ? (
+      {overlay ? (
         <text
-          x={payload.year > 2025.7 ? cx - 12 : cx + 12}
-          y={cy + 4}
-          textAnchor={payload.year > 2025.7 ? "end" : "start"}
+          x={payload.cost > 6 ? cx - 12 : cx + 12}
+          y={cy - 8}
+          textAnchor={payload.cost > 6 ? "end" : "start"}
           fill="var(--color-fg)"
           fontSize={12}
         >
@@ -80,7 +84,7 @@ function ModelDot({
   );
 }
 
-export function ModelChart({ points, labs, selectedId, onSelect, onHover }: Props) {
+export function ModelChart({ points, selectedId, onSelect, onHover }: Props) {
   const frame = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
 
@@ -94,43 +98,37 @@ export function ModelChart({ points, labs, selectedId, onSelect, onHover }: Prop
     return () => observer.disconnect();
   }, []);
 
-  const ordered = [...points].sort((a, b) => a.year - b.year || a.id.localeCompare(b.id));
-  const ticks = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+  const ordered = [...points].sort((a, b) => a.cost - b.cost || a.id.localeCompare(b.id));
+  const selected = ordered.filter((point) => point.id === selectedId);
 
   return (
-    <div ref={frame} className="model-chart relative">
+    <div ref={frame} className="chart-frame relative">
       {width > 0 ? (
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 16, right: 16, bottom: 8, left: 4 }}>
-            <CartesianGrid stroke="var(--color-line)" vertical={false} />
+          <ScatterChart margin={{ top: 28, right: 16, bottom: 8, left: 0 }}>
+            <CartesianGrid stroke="var(--color-line)" />
             <XAxis
               type="number"
-              dataKey="year"
-              domain={[2020, 2027]}
-              ticks={ticks}
-              tickFormatter={(value: number) => String(value)}
+              dataKey="cost"
+              scale="log"
+              domain={[0.08, 16]}
+              ticks={[0.1, 0.5, 1, 5, 10]}
+              tickFormatter={money}
               tick={{ fill: "var(--color-muted)", fontSize: 12 }}
               axisLine={{ stroke: "var(--color-line)" }}
               tickLine={false}
               height={28}
+              allowDataOverflow
             />
             <YAxis
               type="number"
-              dataKey="lane"
-              domain={[-0.5, Math.max(labs.length - 0.5, 0.5)]}
-              ticks={labs.map((_, index) => index)}
-              tickFormatter={(value: number) => labs[value] ?? ""}
-              reversed
-              width={width < 640 ? 72 : 88}
-              tick={{ fill: "var(--color-fg)", fontSize: width < 640 ? 11 : 13 }}
+              dataKey="aaii"
+              domain={[20, 65]}
+              ticks={[25, 35, 45, 55]}
+              width={36}
+              tick={{ fill: "var(--color-muted)", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
-            />
-            <ReferenceLine
-              x={TODAY_YEAR}
-              stroke="var(--color-faint)"
-              strokeDasharray="3 4"
-              label={{ value: "今天", fill: "var(--color-faint)", fontSize: 11, position: "insideTopRight" }}
             />
             <Scatter
               data={ordered}
@@ -140,21 +138,19 @@ export function ModelChart({ points, labs, selectedId, onSelect, onHover }: Prop
                   cx={raw.cx}
                   cy={raw.cy}
                   payload={raw.payload}
-                  selectedId={selectedId}
                   onSelect={onSelect}
                   onHover={onHover}
                 />
               )}
             />
             <Scatter
-              data={ordered.filter((point) => point.id === selectedId)}
+              data={selected}
               isAnimationActive={false}
               shape={(raw: DotProps) => (
                 <ModelDot
                   cx={raw.cx}
                   cy={raw.cy}
                   payload={raw.payload}
-                  selectedId={selectedId}
                   onSelect={onSelect}
                   onHover={onHover}
                   overlay

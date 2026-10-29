@@ -139,7 +139,7 @@ export function Atlas() {
           <h1 className="mt-1 font-serif text-4xl leading-none text-fg sm:text-5xl">AI 文明座標</h1>
           <p className="mt-3 text-base leading-relaxed text-muted">
             {view === "models"
-              ? "這張圖只排模型換代。橫軸是時間，縱軸是實驗室，不打文明分數。GPT、Claude、Gemini 各自一列。"
+              ? "縱軸是 AAII，橫軸是完成一題的成本。這張圖不打文明分數。左上更好：更強，而且更便宜。"
               : view === "read"
                 ? "分數不是智商，也不是跑分。下面說明四項怎麼加，以及思考和投入各算在哪。"
                 : "橫軸是時間，縱軸是對人類文明的影響，0 到 100。這張圖不收每一次模型換代。實心是已發生的事。空心是預測：分數表示若發生，不是發生機率。"}
@@ -362,7 +362,7 @@ export function Atlas() {
 
       <footer className="border-t border-line pt-4 text-sm leading-relaxed text-faint">
         收的是範式轉移，不是每一次模型改版。ChatGPT 很高，因為使用方式被改寫；AlphaFold
-        很高，因為生物學的基礎設施被改寫；Transformer 很高，因為後來的系統站在它上面。今天之後的空心點是情節：代理人若成為工作起點、科學發現若變成合作、以及一個還未被做出來的通用學習系統。信心低的是年份，不是把影響說小。各家旗艦和開源權重的發布時間在「模型時間」，分數怎麼讀在「怎麼讀」。
+        很高，因為生物學的基礎設施被改寫；Transformer 很高，因為後來的系統站在它上面。今天之後的空心點是情節：代理人若成為工作起點、科學發現若變成合作、以及一個還未被做出來的通用學習系統。信心低的是年份，不是把影響說小。模型的 AAII 和每題成本在「模型時間」，分數怎麼讀在「怎麼讀」。
       </footer>
       </>
       ) : null}

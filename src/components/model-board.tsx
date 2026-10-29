@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { LAB_ORDER, labModels, type LabModel, type Weights } from "@/data/models";
-import { ModelChart, type ModelPoint } from "@/components/model-chart";
+import { AAII_SOURCE, aaiiModels, paretoOf, type AaiiPoint, type Weights } from "@/data/models";
+import { ModelChart, type CostPoint } from "@/components/model-chart";
 
 type WeightFilter = "all" | Weights;
 type RegionFilter = "all" | "中國";
@@ -9,42 +9,48 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-function yearOf(m: LabModel) {
-  return m.y + (m.m - 1) / 12 + (m.d - 1) / 365;
+function money(value: number) {
+  return `$${value.toFixed(2)}`;
 }
 
 export function ModelBoard() {
   const [weights, setWeights] = useState<WeightFilter>("all");
   const [region, setRegion] = useState<RegionFilter>("all");
-  const [selectedId, setSelectedId] = useState("claude1");
+  const [selectedId, setSelectedId] = useState("sol");
   const [hoverId, setHoverId] = useState<string | null>(null);
 
   const visible = useMemo(() => {
-    return labModels.filter((m) => {
-      if (weights !== "all" && m.weights !== weights) return false;
-      if (region === "中國" && m.region !== "中國") return false;
+    return aaiiModels.filter((model) => {
+      if (weights !== "all" && model.weights !== weights) return false;
+      if (region === "中國" && model.region !== "中國") return false;
       return true;
     });
   }, [weights, region]);
 
-  const labs = useMemo(
-    () => LAB_ORDER.filter((lab) => visible.some((m) => m.lab === lab)),
-    [visible],
+  const frontier = useMemo(() => new Set(paretoOf(visible).map((model) => model.id)), [visible]);
+
+  const plotted = useMemo<CostPoint[]>(
+    () => visible.map((model) => ({ ...model, frontier: frontier.has(model.id) })),
+    [visible, frontier],
   );
 
-  const plotted = useMemo<ModelPoint[]>(() => {
-    return visible.map((m) => ({ ...m, year: yearOf(m), lane: labs.indexOf(m.lab as (typeof LAB_ORDER)[number]) }));
-  }, [visible, labs]);
-
-  const shown = plotted.find((m) => m.id === (hoverId ?? selectedId)) ?? plotted[0];
+  const shown =
+    plotted.find((model) => model.id === (hoverId ?? selectedId)) ??
+    [...plotted].sort((a, b) => b.aaii - a.aaii)[0];
 
   return (
     <div className="flex flex-col gap-4">
       <p className="max-w-2xl text-base leading-relaxed text-muted">
-        橫軸是時間，縱軸是實驗室。一點是一次旗艦發布，不是文明分數。琥珀是閉源，灰綠是權重公開。Google 的 Gemini、Anthropic 的 Claude，以及開源與中國實驗室，都在這張圖上。
+        縱軸是 AAII，Artificial Analysis 的智力指數 v5，滿分 100，目前最高 59。橫軸是 cost per task：跑完指數裡一題的平均美元，對數刻度。左上更好。灰綠虛線圈是帕累托前沿，沒有別的點又更強又更便宜。
       </p>
-      <div className="flex gap-2 overflow-x-auto" role="group" aria-label="權重">
-        <Filter pressed={weights === "all" && region === "all"} onClick={() => { setWeights("all"); setRegion("all"); }}>
+      <div className="flex gap-2 overflow-x-auto" role="group" aria-label="篩選">
+        <Filter
+          pressed={weights === "all" && region === "all"}
+          onClick={() => {
+            setWeights("all");
+            setRegion("all");
+          }}
+        >
           全部
         </Filter>
         <Filter pressed={weights === "權重公開"} onClick={() => setWeights(weights === "權重公開" ? "all" : "權重公開")}>
@@ -60,7 +66,6 @@ export function ModelBoard() {
 
       <ModelChart
         points={plotted}
-        labs={[...labs]}
         selectedId={shown?.id ?? ""}
         onSelect={(id) => {
           setHoverId(null);
@@ -68,48 +73,64 @@ export function ModelBoard() {
         }}
         onHover={setHoverId}
       />
-      <p className="text-sm text-faint">點圓點看特色。同一列是同一家的換代，由左到右變新。</p>
+      <p className="text-sm leading-relaxed text-faint">
+        琥珀是閉源，灰綠是權重公開。同一模型的不同思考力度是不同的點。Opus 5.5 低力度在左下，最高力度在右上。
+      </p>
 
-      {shown ? (
-        <article className="rounded-2xl border border-line bg-surface p-5">
-          <p className="text-sm text-amber">
-            {shown.lab}
-            <span className="mx-2 text-faint">·</span>
-            {shown.region}
-            <span className="mx-2 text-faint">·</span>
-            <span className={shown.weights === "權重公開" ? "text-sage" : "text-amber"}>{shown.weights}</span>
-          </p>
-          <h2 className="mt-1 font-serif text-3xl leading-tight text-fg">{shown.name}</h2>
-          <p className="mt-1 text-sm text-muted">{shown.dateLabel}</p>
-          <p className="mt-4 text-base leading-relaxed text-fg">{shown.note}</p>
-        </article>
-      ) : null}
+      {shown ? <Detail model={shown} /> : null}
 
       <div className="rail-scroll flex gap-2 overflow-x-auto pb-2">
         {[...plotted]
-          .sort((a, b) => a.year - b.year)
-          .map((m) => {
-            const on = m.id === shown?.id;
+          .sort((a, b) => b.aaii - a.aaii || a.cost - b.cost)
+          .map((model) => {
+            const on = model.id === shown?.id;
             return (
               <button
-                key={m.id}
+                key={model.id}
                 type="button"
-                onClick={() => setSelectedId(m.id)}
+                onClick={() => setSelectedId(model.id)}
                 className={cx(
-                  "flex h-16 w-36 shrink-0 flex-col items-start justify-center rounded-xl border px-3 text-left transition-transform duration-150 ease-out active:scale-[0.96]",
+                  "flex h-16 w-40 shrink-0 flex-col items-start justify-center rounded-xl border px-3 text-left transition-transform duration-150 ease-out active:scale-[0.96]",
                   on ? "border-amber bg-surface-2" : "border-line bg-surface",
                 )}
               >
-                <span className="text-xs tabular-nums text-faint">{m.y}</span>
-                <span className="w-full truncate text-sm font-semibold text-fg">{m.name}</span>
-                <span className={m.weights === "權重公開" ? "text-xs text-sage" : "text-xs text-amber"}>
-                  {m.lab}
+                <span className="w-full truncate text-sm font-semibold text-fg">{model.name}</span>
+                <span className={model.weights === "權重公開" ? "text-xs text-sage" : "text-xs text-amber"}>
+                  {model.aaii} · {money(model.cost)}
                 </span>
               </button>
             );
           })}
       </div>
     </div>
+  );
+}
+
+function Detail({ model }: { model: AaiiPoint }) {
+  return (
+    <article className="rounded-2xl border border-line bg-surface p-5">
+      <p className="text-sm text-amber">
+        {model.lab}
+        <span className="mx-2 text-faint">·</span>
+        {model.region}
+        <span className="mx-2 text-faint">·</span>
+        <span className={model.weights === "權重公開" ? "text-sage" : "text-amber"}>{model.weights}</span>
+      </p>
+      <h2 className="mt-1 font-serif text-3xl leading-tight text-fg">{model.name}</h2>
+      <p className="mt-1 text-sm text-muted">思考力度：{model.effort}</p>
+      <p className="mt-4 flex items-end gap-6">
+        <span>
+          <span className="block text-sm text-faint">AAII</span>
+          <span className="font-serif text-5xl leading-none tabular-nums text-amber">{model.aaii}</span>
+        </span>
+        <span>
+          <span className="block text-sm text-faint">每題成本</span>
+          <span className="font-serif text-5xl leading-none tabular-nums text-fg">{money(model.cost)}</span>
+        </span>
+      </p>
+      <p className="mt-4 text-base leading-relaxed text-fg">{model.note}</p>
+      <p className="mt-3 text-sm leading-relaxed text-faint">{AAII_SOURCE}</p>
+    </article>
   );
 }
 
