@@ -125,7 +125,7 @@ export function ModelBoard() {
         onHover={setHoverId}
       />
       <p className="text-sm leading-relaxed text-faint">
-        琥珀是閉源，灰綠是權重公開。同一模型的不同思考力度是不同的點。Opus 5.5 低力度在左下，最高力度在右上。
+        琥珀是閉源，灰綠是權重公開。這張圖是智力指數 v5。Opus 4.8、Sonnet 5 的分數是舊指數，不畫在這裡，在下面的歷代發布。
       </p>
 
       {shown ? <Detail model={shown} /> : null}

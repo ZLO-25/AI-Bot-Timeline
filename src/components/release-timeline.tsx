@@ -25,16 +25,16 @@ export function ReleaseTimeline({
       }),
     [lab, weights, region],
   );
-  const [selectedId, setSelectedId] = useState(visible[0]?.id ?? "");
-  const shown = visible.find((item) => item.id === selectedId) ?? visible[0];
-  const years = [...new Set(visible.map((item) => item.y))];
+  const [selectedId, setSelectedId] = useState("");
+  const shown = visible.find((item) => item.id === selectedId) ?? visible[visible.length - 1];
+  const years = [...new Set(visible.map((item) => item.y))].sort((a, b) => b - a);
 
   return (
     <section className="flex flex-col gap-3">
       <div>
         <h2 className="font-serif text-2xl text-fg">歷代發布</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          前沿實驗室有名字的一代，從 GPT-2 收到現在。不是每一個參數尺寸。上面的圖只畫有 AAII 和每題成本的型號，沒有這兩項的不進那張圖。
+          前沿實驗室有名字的一代，新的在前。Opus 4.8、Sonnet 5 在 2026 年這段。上面的分數圖只用智力指數 v5，較早版本的舊指數分數不畫進去。
         </p>
       </div>
       {shown ? <ReleaseDetail item={shown} /> : <p className="text-sm text-muted">這個篩選下面沒有發布。</p>}
@@ -45,6 +45,8 @@ export function ReleaseTimeline({
             <ul className="flex flex-col gap-1">
               {visible
                 .filter((item) => item.y === year)
+                .slice()
+                .reverse()
                 .map((item) => {
                   const on = item.id === shown?.id;
                   return (
