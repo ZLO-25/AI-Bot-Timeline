@@ -96,5 +96,11 @@ export const releases: Release[] = [
   { id: "spark-open", y: 2026, name: "Muse Spark Open", lab: "Meta", region: "美國", weights: "權重公開", dateLabel: "2026年10月", trait: "Meta 放出的權重。分數低於閉源的 Muse Wonder。" },
   { id: "minimax", y: 2026, name: "MiniMax M3.1 Flash", lab: "MiniMax", region: "中國", weights: "權重公開", dateLabel: "2026年10月", trait: "MiniMax 的開源 Flash。" },
   { id: "terra", y: 2026, name: "GPT-6.1 Terra", lab: "OpenAI", region: "美國", weights: "閉源", dateLabel: "2026年10月26日", trait: "高分帶裡每題較便宜的一檔。" },
-  { id: "carbon", y: 2026, name: "Gemini 4 Carbon", lab: "Google", region: "美國", weights: "閉源", dateLabel: "2026年10月28日", trait: "這次智力指數的最高分。" },
+  { id: "carbon", y: 2026, name: "Gemini 4 Carbon", lab: "Google", region: "美國", weights: "閉源", dateLabel: "2026年10月28日", trait: "發布當天的智力指數最高分。11 月已被 Fable 5.2 超過。" },
+  { id: "fable52", y: 2026, name: "Claude Fable 5.2", lab: "Anthropic", region: "美國", weights: "閉源", dateLabel: "2026年11月9日", trait: "Fable 的換代。目前指數最高，每題成本也高很多。同一天還有 Mythos 5.2。" },
+  { id: "hydrogen", y: 2026, name: "Gemini 4 Hydrogen", lab: "Google", region: "美國", weights: "閉源", dateLabel: "2026年11月12日", trait: "Carbon 與 Neon 之間的一檔。分數靠近 Sonnet，每題便宜很多。" },
+  { id: "qwen4", y: 2026, name: "Qwen4 Max", lab: "阿里", region: "中國", weights: "閉源", dateLabel: "2026年11月16日", trait: "阿里的閉源旗艦換代。權重仍未公開。" },
+  { id: "astra62", y: 2026, name: "GPT-6.2 Astra", lab: "OpenAI", region: "美國", weights: "閉源", dateLabel: "2026年11月17日", trait: "GPT-6 的換代旗艦。少冠軍幾分，每題成本低很多。" },
+  { id: "sol62", y: 2026, name: "GPT-6.2 Sol", lab: "OpenAI", region: "美國", weights: "閉源", dateLabel: "2026年11月17日", trait: "和 Astra 6.2 同一天的便宜檔。高分，每題約 1 美元。" },
+  { id: "neon", y: 2026, name: "Gemini 4 Neon", lab: "Google", region: "美國", weights: "閉源", dateLabel: "2026年11月18日", trait: "Google 這個月的最高點。和 Astra 6.2 同分，每題更貴。" },
 ];

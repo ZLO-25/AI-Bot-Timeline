@@ -25,14 +25,20 @@ type Props = {
 };
 
 const SHORT: Record<string, string> = {
+  fable52: "Fable 5.2",
+  astra62: "Astra 6.2",
+  neon: "Neon",
   carbon: "Carbon",
   astra: "Astra",
+  sol62: "Sol 6.2",
   sol: "Sol",
   sonnet55: "Sonnet 5.5",
+  hydrogen: "Hydrogen",
   terra: "Terra",
   argon: "Argon",
   fable: "Fable",
   kimi31: "Kimi K3.1",
+  qwen4: "Qwen4",
   muse: "Muse",
   haiku: "Haiku",
   spark13: "Spark 1.3",
@@ -134,7 +140,7 @@ export function ModelChart({ points, selectedId, onSelect, onHover }: Props) {
               type="number"
               dataKey="cost"
               scale="log"
-              domain={[0.08, 16]}
+              domain={[0.08, 40]}
               ticks={[0.1, 0.5, 1, 5, 10]}
               tickFormatter={money}
               tick={{ fill: "var(--color-muted)", fontSize: 12 }}
@@ -146,7 +152,7 @@ export function ModelChart({ points, selectedId, onSelect, onHover }: Props) {
             <YAxis
               type="number"
               dataKey="aaii"
-              domain={[20, 65]}
+              domain={[20, 72]}
               ticks={[25, 35, 45, 55]}
               width={36}
               tick={{ fill: "var(--color-muted)", fontSize: 12 }}

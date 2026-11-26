@@ -1,7 +1,7 @@
 export type Weights = "閉源" | "權重公開";
 export type Region = "美國" | "中國" | "歐洲";
 
-/** Artificial Analysis Intelligence Index v5.0，與該指數每一題的平均成本。 */
+/** Artificial Analysis Intelligence Index v5.0.2，與該指數每一題的平均成本。 */
 export type AaiiPoint = {
   id: string;
   name: string;
@@ -20,9 +20,47 @@ export type AaiiPoint = {
 };
 
 export const AAII_SOURCE =
-  "Artificial Analysis Intelligence Index v5.0，模型頁與 2026年10月28日的 Carbon 說明。每題成本是跑完指數裡一題的加權平均美元。多數點用該模型最高力度的那一端；Grok 4.7 的 35 分對上的是高力度 6.18 美元，整條產品的成本範圍是 2.92 到 7.51 美元。不是本頁重測。";
+  "Artificial Analysis Intelligence Index v5.0.2，模型頁截至 2026年11月26日。每題成本是跑完指數裡一題的加權平均美元。新點是 11 月的旗艦：Fable 5.2、GPT-6.2、Neon、Hydrogen、Qwen4 Max。10 月已在圖上、模型頁沒有改數字的點，仍用原來的分數與成本。不是本頁重測。";
 
 export const aaiiModels: AaiiPoint[] = [
+  {
+    id: "fable52",
+    name: "Claude Fable 5.2",
+    lab: "Anthropic",
+    region: "美國",
+    weights: "閉源",
+    effort: "最高",
+    released: "2026年11月9日",
+    aaii: 65,
+    cost: 26.54,
+    chartLabel: "Fable 5.2",
+    note: "目前這張表的最高分。每題 26.54 美元，大約是 GPT-6.2 Astra 的六倍多，只多 3 分。貴的那一端把分數買滿了，沒有買到另一個數量級。",
+  },
+  {
+    id: "astra62",
+    name: "GPT-6.2 Astra",
+    lab: "OpenAI",
+    region: "美國",
+    weights: "閉源",
+    effort: "最高",
+    released: "2026年11月17日",
+    aaii: 62,
+    cost: 4,
+    chartLabel: "Astra 6.2",
+    note: "少 Fable 3 分，每題 4 美元。這一個月裡，性價比的變化比冠軍換人更大。",
+  },
+  {
+    id: "neon",
+    name: "Gemini 4 Neon",
+    lab: "Google",
+    region: "美國",
+    weights: "閉源",
+    effort: "極高",
+    released: "2026年11月18日",
+    aaii: 62,
+    cost: 6.44,
+    note: "和 Astra 6.2 同分，每題貴了約六成。Carbon 不再是 Google 的最高點。",
+  },
   {
     id: "carbon",
     name: "Gemini 4 Carbon",
@@ -31,9 +69,9 @@ export const aaiiModels: AaiiPoint[] = [
     weights: "閉源",
     effort: "高",
     released: "2026年10月28日",
-    aaii: 59,
+    aaii: 60,
     cost: 7.76,
-    note: "目前這張表的最高分。貴，但還不是最貴：Opus 5.5 少 1 分，每題卻要 10 美元。",
+    note: "10 月 28 日發布時是最高分。指數改版後是 60，每題仍是 7.76 美元。Fable 5.2、Astra 6.2、Neon 都已超過它。",
   },
   {
     id: "opus55",
@@ -43,10 +81,10 @@ export const aaiiModels: AaiiPoint[] = [
     weights: "閉源",
     effort: "最高",
     released: "2026年9月22日",
-    aaii: 58,
+    aaii: 59,
     cost: 10.04,
     chartLabel: "Opus 5.5",
-    note: "分數緊貼首位，每題成本是這張表裡最貴的一檔。同一模型把思考力度調低，會變成另一個點。",
+    note: "59 分，少 Fable 6 分。每題 10.04 美元，仍是貴的一檔。同一模型把思考力度調低，會變成另一個點。",
   },
   {
     id: "opus55-low",
@@ -71,7 +109,20 @@ export const aaiiModels: AaiiPoint[] = [
     released: "2026年9月3日",
     aaii: 57,
     cost: 6.24,
-    note: "比 Opus 少 1 分，每題便宜約四成。閉源旗艦裡，它比 Anthropic 的最高檔省。",
+    note: "9 月的旗艦。57 分、每題 6.24 美元。11 月的 Astra 6.2 用 4 美元拿到 62。",
+  },
+  {
+    id: "sol62",
+    name: "GPT-6.2 Sol",
+    lab: "OpenAI",
+    region: "美國",
+    weights: "閉源",
+    effort: "最高",
+    released: "2026年11月17日",
+    aaii: 57,
+    cost: 1.01,
+    chartLabel: "Sol 6.2",
+    note: "和 9 月的 Astra 同分，每題大約六分之一。高分帶裡，便宜的那一側這個月又往左移了。",
   },
   {
     id: "sol",
@@ -83,7 +134,7 @@ export const aaiiModels: AaiiPoint[] = [
     released: "2026年9月29日",
     aaii: 55,
     cost: 1.27,
-    note: "離 Opus 只有 3 分，每題成本大約是八分之一。這張圖上最值得看的性價比，在這一點。",
+    note: "9 月的 Sol。離當時的 Opus 只有 3 分，每題大約八分之一。11 月的 Sol 6.2 把這一檔又往上、往左推了。這一點留著，是為了看見一個月裡被換掉。",
   },
   {
     id: "sonnet55",
@@ -119,7 +170,7 @@ export const aaiiModels: AaiiPoint[] = [
     released: "2026年9月",
     aaii: 50,
     cost: 7.68,
-    note: "和 Carbon 差不多貴，少了 9 分。同一家的次級旗艦，不會自動比較便宜。",
+    note: "和 Carbon 差不多貴，少了 10 分。同一家的次級旗艦，不會自動比較便宜。",
   },
   {
     id: "fable",
@@ -131,7 +182,19 @@ export const aaiiModels: AaiiPoint[] = [
     released: "2026年9月",
     aaii: 50,
     cost: 13.04,
-    note: "最高力度每題 13.04 美元，是這張表最貴的一點，分數只有 50。較低力度可以降到 4.49 美元，但那不是這個分數。",
+    note: "5.1 的最高力度，每題 13.04 美元。11 月的 5.2 更貴，也高了 15 分。貴本身不是領先。",
+  },
+  {
+    id: "hydrogen",
+    name: "Gemini 4 Hydrogen",
+    lab: "Google",
+    region: "美國",
+    weights: "閉源",
+    effort: "極高",
+    released: "2026年11月12日",
+    aaii: 54,
+    cost: 3.16,
+    note: "Carbon 與 Neon 之間的一檔。54 分，和 Sonnet 5.5 同分。每題 3.16 美元是 11 月 12 日指數圖上的讀數，大約是 Sonnet 的三分之一。",
   },
   {
     id: "kimi31",
@@ -143,7 +206,7 @@ export const aaiiModels: AaiiPoint[] = [
     released: "2026年10月",
     aaii: 46,
     cost: 3.68,
-    note: "中國實驗室裡這張表最高的一點。權重當時還沒放出。分數仍比已公開權重的模型高一截，也仍離閉源首位 13 分。",
+    note: "中國實驗室裡仍是較高的一點。11 月的 Qwen4 Max 用 43 分、每題 3.27 美元靠過來。離 Fable 5.2 仍差 19 分。權重這次快照仍未公開。",
   },
   {
     id: "muse",
@@ -198,12 +261,12 @@ export const aaiiModels: AaiiPoint[] = [
     name: "Qwen3.8 Max",
     lab: "阿里",
     region: "中國",
-    weights: "權重公開",
+    weights: "閉源",
     effort: "公布配置",
     released: "2026年9月2日",
     aaii: 34,
     cost: 10.02,
-    note: "權重公開，不代表呼叫它便宜。這次每題成本約 10 美元，和 Sonnet 同價，分數少 20。",
+    note: "閉源 Max。每題約 10 美元，分數少 Sonnet 很多。11 月的 Qwen4 Max 把這一檔換掉：分數更高，也便宜很多。",
   },
   {
     id: "dsv41",
@@ -326,16 +389,28 @@ export const aaiiModels: AaiiPoint[] = [
     note: "Meta 放出的權重。25 分、每題 2 美元，比同家閉源的 Muse Wonder 低，也沒有便宜到前沿。",
   },
   {
+    id: "qwen4",
+    name: "Qwen4 Max",
+    lab: "阿里",
+    region: "中國",
+    weights: "閉源",
+    effort: "公布配置",
+    released: "2026年11月16日",
+    aaii: 43,
+    cost: 3.27,
+    note: "阿里的新閉源旗艦。43 分、每題 3.27 美元，高過自己的上一代，也便宜很多。權重仍未公開。",
+  },
+  {
     id: "mistral4",
     name: "Mistral Large 4",
     lab: "Mistral",
     region: "歐洲",
-    weights: "權重公開",
+    weights: "閉源",
     effort: "公布配置",
     released: "2026年10月",
     aaii: 25,
     cost: 5.54,
-    note: "歐洲實驗室的點。分數在表的下緣，每題成本卻在中高價。",
+    note: "歐洲實驗室的閉源大模型。分數在表的下緣，每題成本在中高價。",
   },
 ];
 

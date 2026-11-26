@@ -476,7 +476,7 @@ export const milestones: Milestone[] = [
     anchor: true,
     labelPlace: "below",
     summary:
-      "Grok Bot 從內部原型開放為公開測試。代理人從「示範會點螢幕」走到可以交付的產品：跨工具把任務做完，而不只是回答。到 2026 年 10 月它仍早期。分數評的是這一步的結構——軟體開始被交給去完成工作——不是所有職業已經被換掉。",
+      "Grok Bot 從內部原型開放為公開測試。代理人從「示範會點螢幕」走到可以交付的產品：跨工具把任務做完，而不只是回答。到 2026 年 11 月它仍早期。分數評的是這一步的結構——軟體開始被交給去完成工作——不是所有職業已經被換掉。",
     source: "xAI，Grok Bot 公開測試，2026年8月11日",
   },
   {
@@ -681,8 +681,8 @@ export function yearOf(m: Milestone): number {
   return m.y + (t - start) / (end - start);
 }
 
-/** 2026-10-27，非閏年的第 300 天。 */
-export const TODAY_YEAR = 2026 + 299 / 365;
+/** 2026-11-26，非閏年的第 330 天。 */
+export const TODAY_YEAR = 2026 + 329 / 365;
 
 export const YEAR_MIN = 1943;
 export const YEAR_MAX = 2036;
